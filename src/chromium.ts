@@ -100,6 +100,15 @@ async function getChromiumExecutablePath(
 }
 
 export async function launchChromium(launchOptions?: Partial<LaunchOptions>) {
+  const options = await getLaunchOptions(launchOptions);
+  const browser = await playwright.chromium.launch(options);
+
+  return browser;
+}
+
+export async function getLaunchOptions(
+  launchOptions?: Partial<LaunchOptions>
+): Promise<LaunchOptions> {
   const headless = isHeadlessModeEnabled();
   const args = getChromiumArgs(headless);
   const executablePath = await getChromiumExecutablePath(headless);
@@ -108,15 +117,13 @@ export async function launchChromium(launchOptions?: Partial<LaunchOptions>) {
     ...(await getEnvironmentVariables()),
     ...(launchOptions?.env || {}),
   };
-  const browser = await playwright.chromium.launch({
+  return {
     args,
     executablePath,
     headless,
     env,
     ...launchOptions,
-  });
-
-  return browser;
+  };
 }
 
 export const loadFont = async (input: string) =>
